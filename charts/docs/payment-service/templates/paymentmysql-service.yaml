@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml -o payment-service
+    kompose.version: 1.28.0 (c4137012e)
+  labels:
+    io.kompose.service: paymentmysql
+  name: paymentmysql
+spec:
+  ports:
+    - name: "3306"
+      port: 3306
+      targetPort: 3306
+  selector:
+    io.kompose.service: paymentmysql

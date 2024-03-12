@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml -o kweeter
+    kompose.version: 1.28.0 (c4137012e)
+  labels:
+    io.kompose.service: {{ .Values.serviceName }}
+  name: {{ .Values.serviceName }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: {{ .Values.serviceName }}
+  strategy: { }
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c -f docker-compose.yml -o kweeter
+        kompose.version: 1.28.0 (c4137012e)
+      labels:
+        io.kompose.service: {{ .Values.serviceName }}
+    spec:
+      containers:
+        - image: fontyssa/rekeningrijden
+          name: {{ .Values.serviceName }}
+          ports:
+            - containerPort: 443
+            - containerPort: 80
+          resources:
+            requests:
+              memory: {{.Values.resources.memory | quote }}
+              cpu: {{.Values.resources.cpu | quote }}
+          volumeMounts:
+            - mountPath: /etc/acme
+              name: web-ssl
+              readOnly: true
+      volumes:
+        - name: web-ssl
+          secret:
+            secretName: web-ssl
+      restartPolicy: Always

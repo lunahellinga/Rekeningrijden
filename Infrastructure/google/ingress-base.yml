@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.global-static-ip-name: web-ip
+    kubernetes.io/ingress.allow-http: "true"
+  finalizers:
+  - networking.gke.io/ingress-finalizer-V2
+  name: main-ingress
+  namespace: default
+spec:
+  rules:
+    - host: keycloak.oibss.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 80
+

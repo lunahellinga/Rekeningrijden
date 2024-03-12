@@ -1,0 +1,25 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/instance: rabbitmq
+    app.kubernetes.io/name: rabbitmq
+    argocd.argoproj.io/instance: message-queue
+  name: rabbitmq-detailed
+  namespace: staging
+spec:
+  endpoints:
+  - interval: 30s
+    params:
+      family:
+      - queue_coarse_metrics
+      - queue_consumer_count
+    path: /metrics/detailed
+    port: prometheus
+  namespaceSelector:
+    matchNames:
+    - staging
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: rabbitmq
+      app.kubernetes.io/name: rabbitmq

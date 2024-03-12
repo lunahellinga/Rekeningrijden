@@ -1,0 +1,84 @@
+dex:
+  enabled: false
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+redis:
+  enabled: true
+  resources:
+    requests:
+      cpu: 30m
+      memory: 90Mi
+redis-ha:
+  enabled: false
+repoServer:
+  serviceAccount:
+    create: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+applicationSet:
+  resources:
+    requests:
+      cpu: 150m
+      memory: 250Mi
+notifications:
+  resources:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+
+server:
+#  volumeMounts:
+#    - mountPath: /etc/ssl/certs/root-ca.pem
+#      name: opt-ca-certificates
+#      readOnly: true
+#  volumes:
+#    - name: opt-ca-certificates
+#      hostPath:
+#        path: /opt/ca-certificates/root-ca.pem
+#        type: File
+  certificate:
+    enabled: true
+    domain: argocd.oibss.nl
+    issuer:
+      kind: "ClusterIssuer"
+      name: "letsencrypt-production"
+  config:
+    url: https://argocd.oibss.nl
+    application.instanceLabelKey: argocd.argoproj.io/instance
+    admin.enabled: 'false'
+    resource.exclusions: |
+      - apiGroups:
+          - cilium.io
+        kinds:
+          - CiliumIdentity
+        clusters:
+          - '*'
+    resource.compareoptions: |
+      ignoreResourceStatusField: all
+    oidc.config: |
+      name: Keycloak
+      issuer: https://keycloak.oibss.nl/realms/master
+      clientID: argocd
+      clientSecret: argocd-client-secret
+      requestedScopes: ['openid', 'profile', 'email', 'groups']
+  rbacConfig:
+    policy.default: role:readonly
+    policy.csv: |
+      g, argocd-admin, role:admin
+  extraArgs:
+    - --insecure
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+#  ingress:
+#    annotations:
+#      kubernetes.io/ingress.global-static-ip-name: web-ip
+#      kubernetes.io/ingress.class: gce
+#    enabled: true
+#    hosts:
+#      - argocd.oibss.nl

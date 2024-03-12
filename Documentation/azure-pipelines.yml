@@ -1,0 +1,19 @@
+trigger:
+- main
+
+variables:
+- group: structurizr_remote
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: CmdLine@2
+  displayName: Push to Structurizr remote
+  inputs:
+    script: |
+      mkdir '$(Build.ArtifactStagingDirectory)/structurizr'
+      cd '$(Build.ArtifactStagingDirectory)/structurizr'
+      curl -L -O https://github.com/structurizr/cli/releases/download/v1.30.0/structurizr-cli-1.30.0.zip
+      unzip  structurizr-cli-1.30.0.zip
+      ./structurizr.sh push -id $(structurizr_id) -key $(structurizr_key) -secret $(structurizr_secret) -workspace '$(Build.SourcesDirectory)/workspace.dsl'

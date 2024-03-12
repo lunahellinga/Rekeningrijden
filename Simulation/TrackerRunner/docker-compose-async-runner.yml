@@ -1,0 +1,66 @@
+﻿services:
+  runner-0:
+    image: fontyssa/tracker-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - COUNT=5
+      - INTERVAL=3
+      - BATCH_SIZE=5
+      - STATUS_INTERVAL=120
+      - TIME_FACTOR=100
+      - CAR_URL=https://car.oibss.nl/
+      - TARGET_URL=https://tracker.oibss.nl/
+  runner-1:
+    image: fontyssa/tracker-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - COUNT=5
+      - INTERVAL=3
+      - BATCH_SIZE=5
+      - STATUS_INTERVAL=120
+      - TIME_FACTOR=100
+      - CAR_URL=https://car.oibss.nl/
+      - TARGET_URL=https://tracker.oibss.nl/
+  runner-2:
+    image: fontyssa/tracker-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - COUNT=5
+      - INTERVAL=3
+      - BATCH_SIZE=5
+      - STATUS_INTERVAL=120
+      - TIME_FACTOR=100
+      - CAR_URL=https://car.oibss.nl/
+      - TARGET_URL=https://tracker.oibss.nl/
+  runner-3:
+    image: fontyssa/tracker-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - COUNT=5
+      - INTERVAL=3
+      - BATCH_SIZE=5
+      - STATUS_INTERVAL=120
+      - TIME_FACTOR=100
+      - CAR_URL=https://car.oibss.nl/
+      - TARGET_URL=https://tracker.oibss.nl/
+  runner-4:
+    image: fontyssa/tracker-runner
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - COUNT=5
+      - INTERVAL=3
+      - BATCH_SIZE=5
+      - STATUS_INTERVAL=120
+      - TIME_FACTOR=100
+      - CAR_URL=https://car.oibss.nl/
+      - TARGET_URL=https://tracker.oibss.nl/

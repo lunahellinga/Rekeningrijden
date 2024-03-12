@@ -1,0 +1,40 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.global-static-ip-name: web-ip
+    kubernetes.io/ingress.allow-http: "true"
+    cert-manager.io/issue-temporary-certificate: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
+  name: main-ingress
+  namespace: default
+spec:
+  rules:
+    - host: keycloak.oibss.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 80
+    - host: argocd.oibss.nl
+      http:
+        paths:
+          - backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - keycloak.oibss.nl
+        - argocd.oibss.nl
+      secretName: web-ssl
+

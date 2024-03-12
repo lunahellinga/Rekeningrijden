@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: carmicroservice-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: carmicroservice
+  template:
+    metadata:
+      labels:
+        app: carmicroservice
+    spec:
+      containers:
+        - name: carmicroservice
+          image: carmicroservice
+          imagePullPolicy: Never

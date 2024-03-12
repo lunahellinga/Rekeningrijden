@@ -1,0 +1,34 @@
+# Template file for running python linters
+
+steps:
+  - task: CmdLine@2
+    displayName: Formatting (Black)
+    continueOnError: true
+    inputs:
+      script: |
+        poetry shell
+        poetry run black . --check
+
+  - task: CmdLine@2
+    displayName: PEP Enforcement (Flake8)
+    continueOnError: true
+    inputs:
+      script: |
+        poetry shell
+        poetry run flake8
+
+  - task: CmdLine@2
+    displayName: YAML Linting (yamllint)
+    continueOnError: true
+    inputs:
+      script: |
+        poetry shell
+        poetry run yamllint .
+
+  - task: CmdLine@2
+    displayName: Docstring Spelling (pylint)
+    continueOnError: true
+    inputs:
+      script: |
+        poetry shell
+        poetry run pylint --disable all --enable spelling --recursive=y ./

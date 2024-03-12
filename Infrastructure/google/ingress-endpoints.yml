@@ -1,0 +1,95 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    kubernetes.io/ingress.class: gce
+    kubernetes.io/ingress.global-static-ip-name: web-ip
+    kubernetes.io/ingress.allow-http: "true"
+    cert-manager.io/issue-temporary-certificate: "true"
+    acme.cert-manager.io/http01-edit-in-place: "true"
+  name: main-ingress
+  namespace: default
+spec:
+  rules:
+    - host: keycloak.oibss.nl
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 80
+    - host: argocd.oibss.nl
+      http:
+        paths:
+          - backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: international.oibss.nl
+      http:
+        paths:
+          - backend:
+              service:
+                name: international-api
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+    - host: tracker.oibss.nl
+      http:
+        paths:
+          - backend:
+              service:
+                name: router-api
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: lts.oibss.nl
+      http:
+        paths:
+          - backend:
+              service:
+                name: data-service
+                port:
+                  number: 80
+            pathType: Prefix
+            path: /
+    - host: car.oibss.nl
+      http:
+        paths:
+          - backend:
+              service:
+                name: car-service
+                port:
+                  number: 80
+            pathType: Prefix
+            path: /
+    - host: rekeningrijden.oibss.nl
+      http:
+        paths:
+          - backend:
+              service:
+                name: rekeningrijden-web
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+
+  tls:
+    - hosts:
+        - keycloak.oibss.nl
+        - argocd.oibss.nl
+        - international.oibss.nl
+        - tracker.oibss.nl
+        - lts.oibss.nl
+        - car.oibss.nl
+        - rekeningrijden.oibss.nl
+      secretName: web-ssl

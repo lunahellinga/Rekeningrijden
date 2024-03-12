@@ -1,0 +1,64 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  labels:
+    app.kubernetes.io/part-of: rekeningrijden
+  name: router-service-internal
+  namespace: default
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://groep2rekeningrijden.github.io/charts/
+    chart: router-service
+    targetRevision: '*'
+    helm:
+      parameters:
+        - name: serviceName
+          value: router-service-internal
+        - name: region.type
+          value: PLACE
+        - name: region.area
+          value: Brussels, Belgium
+        - name: serviceUri.car
+          value: http://car-service/vehicle
+        - name: serviceUri.payment
+          value: http://payment-service/getPrices
+        - name: masstransit.input
+          value: Coordinate_Service.DTOs:PublishCoordinatesDTO
+        - name: masstransit.output
+          value: LTS.DTOs:RouteDTO
+        - name: rabbitmq.host
+          value: rabbitmq
+        - name: rabbitmq.port
+          value: "5672"
+        - name: rabbitmq.user
+          value: rabbit
+        - name: rabbitmq.password
+          value: rabbit
+        - name: rabbitmq.queue
+          value: py-router-internal
+        - name: rabbitmq.virtualHost
+          value: /
+        - name: logLevel
+          value: info
+        - name: resources.memory
+          value: 1Gi
+        - name: resources.cpu
+          value: "1"
+        - name: maxReplicas
+          value: "3"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  revisionHistoryLimit: 3
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+      - FailOnSharedResource=true
+      - PruneLast=true
+    automated:
+      prune: true
+      selfHeal: true

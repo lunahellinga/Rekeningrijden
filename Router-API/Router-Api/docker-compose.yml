@@ -1,0 +1,6 @@
+﻿services:
+  router-api:
+    image: fontyssa/router-api
+    build:
+      context: .
+      dockerfile: Router-Api/Dockerfile

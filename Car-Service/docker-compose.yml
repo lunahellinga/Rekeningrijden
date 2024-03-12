@@ -1,0 +1,28 @@
+﻿version: '3.9'
+services:
+  
+  car-service:
+    image: fontyssa/car-service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - car-db
+  
+  car-db:
+    image: fontyssa/postgres-extended
+    restart: always
+    environment:
+      - POSTGRES_DB=vehicle
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - car-db:/var/lib/postgresql/data
+
+volumes:
+  car-db:
+    driver: local

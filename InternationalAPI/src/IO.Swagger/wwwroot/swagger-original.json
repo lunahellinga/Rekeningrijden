@@ -1,0 +1,373 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "Rekeningrijden Belgium API",
+    "description" : "The international API for Rekeningrijden Belgium",
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version" : "0.4.0"
+  },
+  "servers" : [ {
+    "url" : "replacethis.withgcloudurl.com/",
+    "description" : "International API"
+  } ],
+  "tags" : [ {
+    "name" : "routing",
+    "description" : "Routing related API endpoints"
+  }, {
+    "name" : "interpol",
+    "description" : "Interpol related API endpoints"
+  } ],
+  "paths" : {
+    "/submit-raw" : {
+      "post" : {
+        "tags" : [ "routing" ],
+        "summary" : "Submit route",
+        "description" : "Submit raw route data to be processed by another country and returned at a later time",
+        "operationId" : "submitRaw",
+        "parameters" : [ {
+          "name" : "cc",
+          "in" : "query",
+          "description" : "ISO 3166-1 Alpha-2 compliant country code",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "pattern" : "[A-Z]{2}",
+            "type" : "string",
+            "format" : "ISO 3166-1 Alpha-2",
+            "example" : "NL"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/rawRoute"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "accepted"
+          },
+          "400" : {
+            "description" : "invalid input"
+          }
+        }
+      }
+    },
+    "/return-processed" : {
+      "post" : {
+        "tags" : [ "routing" ],
+        "summary" : "Return processed route",
+        "description" : "Return the processed route data based on an earlier submission",
+        "operationId" : "storeProcessed",
+        "parameters" : [ {
+          "name" : "cc",
+          "in" : "query",
+          "description" : "ISO 3166-1 Alpha-2 compliant country code",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "pattern" : "[A-Z]{2}",
+            "type" : "string",
+            "format" : "ISO 3166-1 Alpha-2",
+            "example" : "NL"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/route"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "accepted"
+          },
+          "400" : {
+            "description" : "invalid input"
+          }
+        }
+      }
+    },
+    "/report" : {
+      "post" : {
+        "tags" : [ "interpol" ],
+        "summary" : "Report stolen vehicle location",
+        "description" : "Report the location of a stolen vehicle and the data needed to recognize the vehicle",
+        "operationId" : "carReported",
+        "parameters" : [ {
+          "name" : "cc",
+          "in" : "query",
+          "description" : "ISO 3166-1 Alpha-2 compliant country code",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "pattern" : "[A-Z]{2}",
+            "type" : "string",
+            "format" : "ISO 3166-1 Alpha-2",
+            "example" : "NL"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/stolenVehicle"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "acknowledged"
+          },
+          "400" : {
+            "description" : "bad input"
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "rawRoute" : {
+        "title" : "Raw Route Data",
+        "required" : [ "points", "vehicle" ],
+        "properties" : {
+          "vehicle" : {
+            "$ref" : "#/components/schemas/vehicle"
+          },
+          "points" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/point"
+            }
+          }
+        },
+        "description" : "Unprocessed route data and the vehicle the route belongs to"
+      },
+      "vehicle" : {
+        "title" : "Vehicle",
+        "required" : [ "classification", "fuelType", "id" ],
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the vehicle in the vehicle's country of origin's system",
+            "format" : "uuid",
+            "example" : "b344e30e-6a32-4c2a-b2db-beae7f97142d"
+          },
+          "vehicleClassification" : {
+            "$ref" : "#/components/schemas/vehicleClassification"
+          },
+          "fuelType" : {
+            "$ref" : "#/components/schemas/fuelType"
+          }
+        },
+        "description" : "A vehicle with data needed to detemine road pricing"
+      },
+      "stolenVehicle" : {
+        "title" : "Stolen Vehicle",
+        "required" : [ "lincense", "location" ],
+        "properties" : {
+          "license" : {
+            "type" : "string",
+            "format" : "license plate",
+            "example" : "AB-12-CD"
+          },
+          "color" : {
+            "type" : "string",
+            "example" : "ROOD"
+          },
+          "brand" : {
+            "type" : "string",
+            "example" : "TOYOTA"
+          },
+          "model" : {
+            "type" : "string",
+            "example" : "CELICA ST"
+          },
+          "location" : {
+            "$ref" : "#/components/schemas/point"
+          }
+        },
+        "description" : "A stolen vehicle with data needed to identify it on location."
+      },
+      "route" : {
+        "title" : "Route",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "description" : "The ID of the vehicle in the vehicle's country of origin's system",
+            "format" : "uuid",
+            "example" : "b344e30e-6a32-4c2a-b2db-beae7f97142d"
+          },
+          "priceTotal" : {
+            "$ref" : "#/components/schemas/price"
+          },
+          "segments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/segment"
+            }
+          }
+        },
+        "description" : "A calculated route with vehicle identifier, total price and a series of OSM nodes and segment prices.",
+        "externalDocs" : {
+          "description" : "OSM Node",
+          "url" : "https://wiki.openstreetmap.org/wiki/Node"
+        }
+      },
+      "segment" : {
+        "properties" : {
+          "time" : {
+            "$ref" : "#/components/schemas/time"
+          },
+          "price" : {
+            "$ref" : "#/components/schemas/price"
+          },
+          "start" : {
+            "$ref" : "#/components/schemas/node"
+          },
+          "way" : {
+            "$ref" : "#/components/schemas/way"
+          },
+          "end" : {
+            "$ref" : "#/components/schemas/node"
+          }
+        },
+        "description" : "A segment of the route"
+      },
+      "node" : {
+        "properties" : {
+          "id" : {
+            "type" : "integer"
+          },
+          "lat" : {
+            "$ref" : "#/components/schemas/lat"
+          },
+          "lon" : {
+            "$ref" : "#/components/schemas/lon"
+          }
+        },
+        "description" : "An OSM Node",
+        "externalDocs" : {
+          "description" : "OSM Node",
+          "url" : "https://wiki.openstreetmap.org/wiki/Node"
+        }
+      },
+      "way" : {
+        "properties" : {
+          "id" : {
+            "type" : "integer"
+          }
+        },
+        "description" : "An OSM Way",
+        "externalDocs" : {
+          "description" : "OSM Way",
+          "url" : "https://wiki.openstreetmap.org/wiki/Way"
+        }
+      },
+      "price" : {
+        "title" : "Price",
+        "type" : "number",
+        "description" : "Price in Euros",
+        "format" : "currency",
+        "example" : 64.3
+      },
+      "point" : {
+        "title" : "Point",
+        "type" : "object",
+        "properties" : {
+          "lat" : {
+            "$ref" : "#/components/schemas/lat"
+          },
+          "lon" : {
+            "$ref" : "#/components/schemas/lon"
+          },
+          "time" : {
+            "$ref" : "#/components/schemas/time"
+          }
+        },
+        "description" : "A point with latitute, longitude and timestamp, including timezone data",
+        "externalDocs" : {
+          "description" : "Coordinate system EPSG:4326 WGS 84",
+          "url" : "https://epsg.io/4326"
+        }
+      },
+      "lat" : {
+        "type" : "number",
+        "description" : "EPSG:4326 latitude",
+        "format" : "float",
+        "example" : 5.1756587
+      },
+      "lon" : {
+        "type" : "number",
+        "description" : "EPSG:4326 longitude",
+        "format" : "float",
+        "example" : 51.5365524
+      },
+      "time" : {
+        "type" : "string",
+        "description" : "Timestamp based on ISO8601 standard",
+        "format" : "date-time",
+        "example" : "2023-07-21T17:32:28Z",
+        "externalDocs" : {
+          "description" : "ISO8601",
+          "url" : "https://www.rfc-editor.org/rfc/rfc3339#section-5.6"
+        }
+      },
+      "fuelType" : {
+        "title" : "Fuel Type",
+        "type" : "string",
+        "description" : "A vehicle's fuel type based on available types in RDW dataset",
+        "example" : "Petrol",
+        "externalDocs" : {
+          "description" : "RDW list of fuel types",
+          "url" : "https://opendata.rdw.nl/Voertuigen/Brandstof-types/r4h8-xyzv"
+        },
+        "enum" : [ "Petrol", "Diesel", "Electricity", "LPG", "CNG", "Alcohol", "LNG", "Hydrogen" ]
+      },
+      "vehicleClassification" : {
+        "title" : "Vehicle Classification",
+        "type" : "string",
+        "description" : "A vehicle's EU standard classification",
+        "example" : "L2",
+        "externalDocs" : {
+          "description" : "EU classification of vehicle types",
+          "url" : "https://alternative-fuels-observatory.ec.europa.eu/general-information/vehicle-types"
+        },
+        "enum" : [ "L", "L1", "L2", "L3", "L4", "L5", "L6", "L7", "M", "M1", "M2", "M3", "N", "N1", "N2", "N3", "O", "O1", "O2", "O3", "O4", "T", "R", "S", "G" ]
+      }
+    },
+    "parameters" : {
+      "countryCode" : {
+        "name" : "cc",
+        "in" : "query",
+        "description" : "ISO 3166-1 Alpha-2 compliant country code",
+        "required" : true,
+        "style" : "form",
+        "explode" : true,
+        "schema" : {
+          "pattern" : "[A-Z]{2}",
+          "type" : "string",
+          "format" : "ISO 3166-1 Alpha-2",
+          "example" : "NL"
+        }
+      }
+    }
+  }
+}

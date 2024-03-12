@@ -1,0 +1,20 @@
+auth:
+  createAdminUser: true
+  adminUser: admin
+  adminPassword: "@6JKMT@qsFLu"
+  managementUser: manager
+  managementPassword: "2gfbhWM#kF$Q"
+proxyAddressForwarding: true
+#ingress:
+#  enabled: true
+#  hostname: keycloak.oibss.nl
+#  pathType: Prefix
+#  annotations:
+#    kubernetes.io/ingress.global-static-ip-name: web-ip
+#    kubernetes.io/ingress.class: gce
+#    kubernetes.io/ingress.allow-http: "true"
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: password
+    password: password

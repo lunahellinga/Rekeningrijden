@@ -1,0 +1,20 @@
+prometheusOperator:
+  resources:
+    requests:
+      memory: 400Mi
+      cpu: 250m
+alertmanagerSpec:
+  resources:
+    requests:
+      memory: 400Mi
+      cpu: 250m
+prometheusSpec:
+  resources:
+    requests:
+      memory: 400Mi
+      cpu: 250m
+thanosRulerSpec:
+  resources:
+    requests:
+      memory: 400Mi
+      cpu: 250m

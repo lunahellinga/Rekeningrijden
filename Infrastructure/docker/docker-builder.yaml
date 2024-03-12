@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  car-service:
+    image: fontyssa/car-service
+    build:
+      context: ../../CarService
+      dockerfile: Dockerfile
+  coordinate-service:
+    image: fontyssa/coordinate-service
+    build:
+      context: ../../Coordinate-Service/Coordinate-Service
+      dockerfile: Coordinate-Service/Dockerfile
+  international-api:
+    image: fontyssa/international-api
+    build:
+      context: ../../InternationalAPI
+      dockerfile: src/IO.Swagger/Dockerfile
+  data-service:
+    image: fontyssa/data-service
+    build:
+      context: ../../LTS/LTS
+      dockerfile: LTS/Dockerfile
+  payment-service:
+    image: fontyssa/payment-service
+    build:
+      context: ../../Payment-Service/Services
+      dockerfile: PaymentService/Dockerfile
+  router-api:
+    image: fontyssa/router-api
+    build:
+      context: ../../Router-API/Router-Api
+      dockerfile: Router-Api/Dockerfile
+  router-service:
+    image: fontyssa/router-service
+    build:
+      context: ../../Router-Service
+      dockerfile: Dockerfile

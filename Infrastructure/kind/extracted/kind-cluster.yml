@@ -1,0 +1,75 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  disableDefaultCNI: true
+  kubeProxyMode: none
+kubeadmConfigPatches:
+  - |-
+    kind: ClusterConfiguration
+    apiServer:
+      extraVolumes:
+        - name: opt-ca-certificates
+          hostPath: /opt/ca-certificates/root-ca.pem
+          mountPath: /opt/ca-certificates/root-ca.pem
+          readOnly: true
+          pathType: File
+      extraArgs:
+        oidc-client-id: kube
+        oidc-issuer-url: https://keycloak.kind.cluster/realms/master
+        oidc-username-claim: email
+        oidc-groups-claim: groups
+        oidc-ca-file: /opt/ca-certificates/root-ca.pem
+    controllerManager:
+      extraArgs:
+        bind-address: 0.0.0.0
+    etcd:
+      local:
+        extraArgs:
+          listen-metrics-urls: http://0.0.0.0:2381
+    scheduler:
+      extraArgs:
+        bind-address: 0.0.0.0
+containerdConfigPatches:
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
+      endpoint = ["http://proxy-docker-hub:5000"]
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
+      endpoint = ["http://proxy-quay:5000"]
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."k8s.gcr.io"]
+      endpoint = ["http://proxy-k8s-gcr:5000"]
+  - |-
+    [plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
+      endpoint = ["http://proxy-gcr:5000"]
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: $PWD/.ssl/root-ca.pem
+        containerPath: /opt/ca-certificates/root-ca.pem
+        readOnly: true
+  - role: control-plane
+    extraMounts:
+      - hostPath: $PWD/.ssl/root-ca.pem
+        containerPath: /opt/ca-certificates/root-ca.pem
+        readOnly: true
+  #  - role: control-plane
+  #    extraMounts:
+  #      - hostPath: $PWD/.ssl/root-ca.pem
+  #        containerPath: /opt/ca-certificates/root-ca.pem
+  #        readOnly: true
+  - role: worker
+    extraMounts:
+      - hostPath: $PWD/.ssl/root-ca.pem
+        containerPath: /opt/ca-certificates/root-ca.pem
+        readOnly: true
+  - role: worker
+    extraMounts:
+      - hostPath: $PWD/.ssl/root-ca.pem
+        containerPath: /opt/ca-certificates/root-ca.pem
+        readOnly: true
+#  - role: worker
+#    extraMounts:
+#      - hostPath: $PWD/.ssl/root-ca.pem
+#        containerPath: /opt/ca-certificates/root-ca.pem
+#        readOnly: true

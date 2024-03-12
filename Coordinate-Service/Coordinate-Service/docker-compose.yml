@@ -1,0 +1,6 @@
+﻿services:
+  lts:
+    image: fontyssa/coordinate-service
+    build:
+      context: .
+      dockerfile: Coordinate-Service/Dockerfile

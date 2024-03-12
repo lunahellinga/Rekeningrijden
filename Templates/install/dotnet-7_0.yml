@@ -1,0 +1,9 @@
+steps:
+  - task: UseDotNet@2
+    inputs:
+      version: "7.x"
+      includePreviewVersions: true
+  - task: NuGetToolInstaller@1
+  - task: NuGetCommand@2
+    inputs:
+      restoreSolution: variables.solution

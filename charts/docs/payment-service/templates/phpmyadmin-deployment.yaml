@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml -o payment-service
+    kompose.version: 1.28.0 (c4137012e)
+  labels:
+    io.kompose.service: phpmyadmin
+  name: phpmyadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: phpmyadmin
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c -f docker-compose.yml -o payment-service
+        kompose.version: 1.28.0 (c4137012e)
+      labels:
+        org: routing-system
+        class: phpmyadmin
+        app.kubernetes.io/name: phpmyadmin
+        io.kompose.service: phpmyadmin
+    spec:
+      containers:
+        - env:
+            - name: PMA_ARBITRARY
+              value: "1"
+          image: phpmyadmin
+          name: phpmyadmin
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: {{.Values.resources.dbMemory | quote }}
+              cpu: {{.Values.resources.dbCpu | quote }}
+      restartPolicy: Always

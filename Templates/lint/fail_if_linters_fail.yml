@@ -1,0 +1,11 @@
+# Template file for failing if linters failed
+
+steps:
+  # We use "continueOnError: true" in our linters so they all run instead of failing on the first one
+  # But this means we have to check if any of them failed to stop the next job from running
+  - task: CmdLine@2
+    displayName: Fail if linters fail
+    inputs:
+      script: |
+        echo AGENT_JOBSTATUS = $AGENT_JOBSTATUS
+        if [[ "$AGENT_JOBSTATUS" == "SucceededWithIssues" ]]; then exit 1; fi

@@ -1,0 +1,38 @@
+# Default values for router-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+serviceName: router-service
+
+# Options: debug, info, warning, error
+logLevel: error
+region:
+  # Can be PLACE with place name or BBOX with dict {south: a, west: b, north: c, east: d}
+  # Example PLACE 'Brussels, Belgium'
+  # Example BBOX {south: 51.075920, west: 3.180542, north: 51.522416, east: 5.907898}
+  type: PLACE
+  # Use area for PLACE such as Brussels
+  area: "Brussels, Belgium"
+  # Use s/w/n/e for BBOX
+  south: ""
+  west: ""
+  north: ""
+  east: ""
+serviceUri:
+  car: http://car-service/vehicle
+  payment: http://payment-service/getPrices
+masstransit:
+  input: Coordinate_Service.DTOs:PublishCoordinatesDTO
+  output: LTS.DTOs:RouteDTO
+rabbitmq:
+  host: rabbitmq
+  port: "5672"
+  user: rabbit
+  password: rabbit
+  queue: py-router
+  virtualHost: /
+
+resources:
+  memory: 2Gi
+  cpu: 500m
+maxReplicas: 1

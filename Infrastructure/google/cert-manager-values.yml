@@ -1,0 +1,7 @@
+installCRDs: true
+networkPolicy:
+  enabled: true
+resources:
+  requests:
+    cpu: 30m
+    memory: 90Mi

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  nginx:
+    container_name: rekeningrijden
+    build:
+      context: rekeningrijden-frontend/rekeningrijden-frontend
+      dockerfile: Dockerfile
+    image: fontyssa/rekeningrijden:latest
+    ports:
+      - "3000:80"

@@ -1,0 +1,10 @@
+steps:
+  - task: DockerCompose@0
+    inputs:
+      containerregistrytype: 'Container Registry'
+      dockerRegistryEndpoint: variables.dockerServiceConnection
+      # dockerComposeFile: '**/docker-compose.yml'
+      dockerComposeFile: variables.dockerComposePath
+      action: 'Push services'
+      includeSourceTags: true
+      includeLatestTag: true

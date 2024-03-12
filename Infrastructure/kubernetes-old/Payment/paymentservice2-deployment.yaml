@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paymentservice2-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paymentservice2
+  template:
+    metadata:
+      labels:
+        app: paymentservice2
+    spec:
+      containers:
+        - name: paymentservice2
+          image: paymentservice2
+          imagePullPolicy: Never
+

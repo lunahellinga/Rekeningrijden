@@ -1,0 +1,250 @@
+version: '3.9'
+
+services:
+  international-api:
+    image: fontyssa/international-api
+    ports:
+      - "5015:80"
+    depends_on:
+      - rabbitmq
+    networks:
+      - rekeningrijden
+  coordinate-service:
+    image: fontyssa/coordinate-service
+    ports:
+      - "5050:80"
+    depends_on:
+      - rabbitmq
+      - coordinate-service-mongo
+    networks:
+      - rekeningrijden
+  coordinate-service-mongo:
+    image: mongo
+    ports:
+      - "27018:27017"
+    networks:
+      - rekeningrijden
+  coordinate-service-mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8082:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: coordinate-service-mongo
+    depends_on:
+      - coordinate-service-mongo
+    networks:
+      - rekeningrijden
+
+  router-api:
+    image: fontyssa/router-api
+    ports:
+      - "5053:80"
+    depends_on:
+      - rabbitmq
+    networks:
+      - rekeningrijden
+
+  data-service:
+    image: fontyssa/data-service
+    ports:
+      - "5054:80"
+    depends_on:
+      - rabbitmq
+      - data-service-mongo
+    networks:
+      - rekeningrijden
+  data-service-mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    networks:
+      - rekeningrijden
+  data-service-mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: data-service-mongo
+    depends_on:
+      - data-service-mongo
+    networks:
+      - rekeningrijden
+
+  car-service:
+    image: fontyssa/car-service
+    ports:
+      - "5055:80"
+    depends_on:
+      - car-db
+    networks:
+      - rekeningrijden
+  car-db:
+    image: fontyssa/postgres-extended
+    restart: always
+    environment:
+      - POSTGRES_DB=vehicle
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - car-db:/var/lib/postgresql/data
+    networks:
+      - rekeningrijden
+
+  payment-service:
+    image: fontyssa/payment-service
+    ports:
+      - "5051:80"
+    restart: on-failure
+    depends_on:
+      - payment-service-mysql
+    networks:
+      - rekeningrijden
+  payment-service-mysql:
+    container_name: paymentmysql
+    image: mysql
+    # NOTE: use of "mysql_native_password" is not recommended: https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    volumes:
+      - mysql_data_paymentrr:/var/lib/mysql
+      - mysql_config_paymentrr:/etc/mysql/conf.d
+    networks:
+      - rekeningrijden
+  payment-service-phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "8083:80"
+    environment:
+      - PMA_ARBITRARY=1
+    networks:
+      - rekeningrijden
+
+  router-brussels:
+    image: fontyssa/router-service
+    environment:
+      # For type PLACE 'Brussels, Belgium', for BBOX {south: 51.075920, west: 3.180542, north: 51.522416, east: 5.907898}
+      # BBOX for netherlands border (without Limburg): 51.075920,3.180542,51.522416,5.907898
+      # BBOX for luxembourg border: 49.483294,5.436859,50.344584,6.302032
+      - REGION=Brussels, Belgium
+      # Types: PLACE, BBOX
+      - REGION_TYPE=PLACE
+      - MASSTRANSIT_INPUT=Coordinate_Service.DTOs:PublishCoordinatesDTO
+      - MASSTRANSIT_OUTPUT=LTS.DTOs:RouteDTO
+      # Include http/https and endpoint
+      - PAYMENT_SERVICE_URL=http://payment-service/getPrices
+      - CAR_SERVICE_URL=http://car-service/vehicle
+      - RABBITMQ_USERNAME=rabbit
+      - RABBITMQ_PASSWORD=rabbit
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_QUEUE=py-router
+      - CACHE_FOLDER=/osmnx-cache
+      - LOG_LEVEL=WARNING
+    volumes:
+      - osmnx-cache:/osmnx-cache
+    networks:
+      - rekeningrijden
+
+
+  router-nl:
+    image: fontyssa/router-service
+    environment:
+      # For type PLACE 'Brussels, Belgium', for BBOX {south: 51.075920, west: 3.180542, north: 51.522416, east: 5.907898}
+      # BBOX for netherlands border: 51.075920,3.180542,51.522416,5.907898
+      # BBOX for luxembourg border: 49.483294,5.436859,50.344584,6.302032
+      - 'REGION={"south": 51.075920, "west": 3.180542, "north": 51.522416, "east": 5.907898}'
+      # Types: PLACE, BBOX
+      - REGION_TYPE=BBOX
+      - MASSTRANSIT_INPUT=IO.Swagger.DTOS:NLRawDTO
+      - MASSTRANSIT_OUTPUT=IO.Swagger.DTOS:NLRouteDTO
+      # Include http/https and endpoint
+      - PAYMENT_SERVICE_URL=http://payment-service/getPrices
+      - CAR_SERVICE_URL=http://car-service/vehicle
+      - RABBITMQ_USERNAME=rabbit
+      - RABBITMQ_PASSWORD=rabbit
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_QUEUE=py-router-nl
+      - CACHE_FOLDER=/osmnx-cache
+      - LOG_LEVEL=WARNING
+    volumes:
+      - osmnx-cache-nl:/osmnx-cache
+    networks:
+      - rekeningrijden
+
+
+  router-lu:
+    image: fontyssa/router-service
+    environment:
+      # For type PLACE 'Brussels, Belgium', for BBOX {south: 51.075920, west: 3.180542, north: 51.522416, east: 5.907898}
+      # BBOX for netherlands border (without Limburg): 51.075920,3.180542,51.522416,5.907898
+      # BBOX for luxembourg border: 49.483294,5.436859,50.344584,6.302032
+      - 'REGION={"south": 49.483294, "west": 5.436859, "north": 50.344584, "east": 6.302032}'
+      # Types: PLACE, BBOX
+      - REGION_TYPE=BBOX
+      - MASSTRANSIT_INPUT=IO.Swagger.DTOS:LURawDTO
+      - MASSTRANSIT_OUTPUT=IO.Swagger.DTOS:LURouteDTO
+      # Include http/https and endpoint
+      - PAYMENT_SERVICE_URL=http://payment-service/getPrices
+      - CAR_SERVICE_URL=http://car-service/vehicle
+      - RABBITMQ_USERNAME=rabbit
+      - RABBITMQ_PASSWORD=rabbit
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_VIRTUAL_HOST=/
+      - RABBITMQ_QUEUE=py-router-lu
+      - CACHE_FOLDER=/osmnx-cache
+      - LOG_LEVEL=WARNING
+    volumes:
+      - osmnx-cache-lu:/osmnx-cache
+    networks:
+      - rekeningrijden
+
+
+  rabbitmq:
+    image: masstransit/rabbitmq:latest
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbit
+      - RABBITMQ_DEFAULT_PASS=rabbit
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+      - "15692:15692"
+    networks:
+      - rekeningrijden
+
+volumes:
+  car-db:
+    driver: local
+  mysql_data_paymentrr:
+    driver: local
+  mysql_config_paymentrr:
+    driver: local
+  mysql_data_authrr:
+    driver: local
+  mysql_config_authrr:
+    driver: local
+  osmnx-cache:
+    driver: local
+  osmnx-cache-nl:
+    driver: local
+  osmnx-cache-lu:
+    driver: local
+
+networks:
+  rekeningrijden:
+    driver: bridge
+
+

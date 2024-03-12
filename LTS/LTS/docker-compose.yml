@@ -1,0 +1,6 @@
+﻿services:
+  lts:
+    image: fontyssa/data-service
+    build:
+      context: .
+      dockerfile: LTS/Dockerfile

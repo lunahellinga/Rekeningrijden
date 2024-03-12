@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml -o data-service
+    kompose.version: 1.28.0 (c4137012e)
+  labels:
+    io.kompose.service: data-service-mongo
+  name: data-service-mongo
+spec:
+  ports:
+    - name: "27017"
+      port: 27017
+      targetPort: 27017
+  selector:
+    io.kompose.service: data-service-mongo

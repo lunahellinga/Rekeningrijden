@@ -1,0 +1,15 @@
+﻿services:
+  io.swagger:
+    image: fontyssa/international-api
+    build:
+      context: .
+      dockerfile: src/IO.Swagger/Dockerfile
+    ports:
+      - 5060:80
+    networks:
+      - docker_rekeningrijden
+
+networks:
+  docker_rekeningrijden:
+    external: true
+  

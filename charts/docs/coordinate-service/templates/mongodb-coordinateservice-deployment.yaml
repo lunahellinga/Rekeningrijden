@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml -o coordinate-service
+    kompose.version: 1.28.0 (c4137012e)
+  labels:
+    io.kompose.service: coordinate-service-mongo
+  name: coordinate-service-mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: coordinate-service-mongo
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c -f docker-compose.yml -o coordinate-service
+        kompose.version: 1.28.0 (c4137012e)
+      labels:
+        org: routing-system
+        class: coordinate-service-mongo
+        app.kubernetes.io/name: coordinate-service-mongo
+        io.kompose.service: coordinate-service-mongo
+    spec:
+      containers:
+        - image: mongo
+          name: coordinate-service-mongo
+          ports:
+            - containerPort: 27017
+          resources:
+            requests:
+              memory: {{.Values.resources.dbMemory | quote }}
+              cpu: {{.Values.resources.dbCpu | quote }}
+          volumeMounts:
+            - mountPath: /data/db
+              name: mongodb-data
+      restartPolicy: Always
+      volumes:
+        - name: mongodb-data
+          persistentVolumeClaim:
+            claimName: mongodb-data

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml -o {{.Values.serviceName}}
+    kompose.version: 1.28.0 (c4137012e)
+  labels:
+    io.kompose.service: {{.Values.serviceName}}
+  name: {{.Values.serviceName}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: {{.Values.serviceName}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c -f docker-compose.yml -o {{.Values.serviceName}}
+        kompose.version: 1.28.0 (c4137012e)
+      labels:
+        io.kompose.service: {{.Values.serviceName}}
+    spec:
+      containers:
+        - env:
+            - name: REGION_TYPE
+              value: {{.Values.region.type}}
+            - name: REGION
+              value: {{.Values.region.area}}
+            - name: SOUTH
+              value: {{.Values.region.south | quote}}
+            - name: WEST
+              value: {{.Values.region.west | quote}}
+            - name: NORTH
+              value: {{.Values.region.north | quote}}
+            - name: EAST
+              value: {{.Values.region.east | quote}}
+            - name: CAR_SERVICE_URL
+              value: {{.Values.serviceUri.car}}
+            - name: PAYMENT_SERVICE_URL
+              value: {{.Values.serviceUri.payment}}
+            - name: MASSTRANSIT_INPUT
+              value: {{.Values.masstransit.input}}
+            - name: MASSTRANSIT_OUTPUT
+              value: {{.Values.masstransit.output}}
+            - name: RABBITMQ_HOST
+              value: {{.Values.rabbitmq.host}}
+            - name: RABBITMQ_PORT
+              value: {{.Values.rabbitmq.port | quote}}
+            - name: RABBITMQ_USERNAME
+              value: {{.Values.rabbitmq.user}}
+            - name: RABBITMQ_PASSWORD
+              value: {{.Values.rabbitmq.password}}
+            - name: RABBITMQ_QUEUE
+              value: {{.Values.rabbitmq.queue}}
+            - name: RABBITMQ_VIRTUAL_HOST
+              value: {{.Values.rabbitmq.virtualHost}}
+            - name: CACHE_FOLDER
+              value: /osmnx-cache
+            - name: LOG_LEVEL
+              value: {{.Values.logLevel | upper}}
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          image: fontyssa/router-service
+          name: {{.Values.serviceName}}
+          resources:
+            requests:
+              memory: {{.Values.resources.memory | quote }}
+              cpu: {{.Values.resources.cpu | quote }}
+          volumeMounts:
+            - mountPath: /osmnx-cache
+              name: {{.Values.serviceName}}-osmnx-cache
+      restartPolicy: Always
+      volumes:
+        - name: {{.Values.serviceName}}-osmnx-cache
+          persistentVolumeClaim:
+            claimName: {{.Values.serviceName}}-osmnx-cache

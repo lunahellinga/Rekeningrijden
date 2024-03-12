@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: haproxy
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: kwetter
+    server: 'https://kubernetes.default.svc'
+  source:
+    repoURL: 'https://charts.bitnami.com/bitnami'
+    targetRevision: '*'
+    chart: haproxy
+  sources: []
+  project: default
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - PruneLast=true
+
+# TODO:
+# https://haproxy-ingress.github.io/docs/getting-started/
+# https://haproxy-ingress.github.io/docs/configuration/keys/
+# https://www.haproxy.com/blog/verify-oauth-jwt-tokens-with-haproxy/
+# For more: https://github.com/jcmoraisjr/haproxy-ingress#configuration

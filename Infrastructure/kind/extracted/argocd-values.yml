@@ -1,0 +1,55 @@
+dex:
+  enabled: false
+redis:
+  enabled: true
+redis-ha:
+  enabled: false
+repoServer:
+  serviceAccount:
+    create: true
+server:
+  volumeMounts:
+    - mountPath: /etc/ssl/certs/root-ca.pem
+      name: opt-ca-certificates
+      readOnly: true
+  volumes:
+    - name: opt-ca-certificates
+      hostPath:
+        path: /opt/ca-certificates/root-ca.pem
+        type: File
+  config:
+    url: https://argocd.$DNSMASQ_DOMAIN
+    application.instanceLabelKey: argocd.argoproj.io/instance
+    admin.enabled: 'false'
+    resource.exclusions: |
+      - apiGroups:
+          - cilium.io
+        kinds:
+          - CiliumIdentity
+        clusters:
+          - '*'
+    resource.compareoptions: |
+      ignoreResourceStatusField: all
+    oidc.config: |
+      name: Keycloak
+      issuer: https://keycloak.$DNSMASQ_DOMAIN/realms/master
+      clientID: argocd
+      clientSecret: argocd-client-secret
+      requestedScopes: ['openid', 'profile', 'email', 'groups']
+  rbacConfig:
+    policy.default: role:readonly
+    policy.csv: |
+      g, argocd-admin, role:admin
+  extraArgs:
+    - --insecure
+  ingress:
+    annotations:
+      cert-manager.io/cluster-issuer: ca-issuer
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - argocd.$DNSMASQ_DOMAIN
+    tls:
+      - secretName: argocd.$DNSMASQ_DOMAIN
+        hosts:
+          - argocd.$DNSMASQ_DOMAIN

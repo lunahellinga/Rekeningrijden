@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f docker-compose.yml
+    kompose.version: 1.26.0 (40646f47)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: carmicroservice
+  name: carmicroservice
+spec:
+  containers:
+    - image: carmicroservice
+      name: carmicroservice
+      imagePullPolicy: Never
+      ports:
+        - containerPort: 80
+      resources: {}
+  restartPolicy: OnFailure
+status: {}

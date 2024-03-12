@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -c -f docker-compose.yml -o data-service
+    kompose.version: 1.28.0 (c4137012e)
+  labels:
+    io.kompose.service: data-service
+  name: data-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: data-service
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -c -f docker-compose.yml -o data-service
+        kompose.version: 1.28.0 (c4137012e)
+      labels:
+        io.kompose.service: data-service
+    spec:
+      containers:
+        - image: fontyssa/data-service
+          name: data-service
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: {{.Values.resources.memory | quote }}
+              cpu: {{.Values.resources.cpu | quote }}
+      restartPolicy: Always

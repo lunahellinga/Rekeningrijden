@@ -1,0 +1,73 @@
+---
+trigger:
+  branches:
+    include:
+      - "*"
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  # Differentiate between branches
+  isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+  isDev: $[eq(variables['Build.SourceBranch'], 'refs/heads/dev')]
+  # Configure SonarCloud
+  cliProjectKey: #TODO: Add as part of SonarCloud setup
+  cliProjectName: #TODO: Add as part of SonarCloud setup
+  solution: "**/*.sln"
+  buildPlatform: "Any CPU"
+  buildConfiguration: "Release"
+  dockerRegistryServiceConnection: "FontysServiceConnection"
+  dockerRepository: "fontyssa/data-service"
+  dockerFile: "**/**/Dockerfile"
+
+resources:
+  repositories:
+    - repository: templates
+      endpoint: Groep2Rekeningrijden
+      type: github
+      name: Groep2Rekeningrijden/Templates
+
+stages:
+  - stage: Build
+    displayName: "Build Stage"
+
+    jobs:
+      - job: BuildJob
+        displayName: "Build Job"
+
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              version: "7.x"
+              includePreviewVersions: true
+
+          - task: NuGetToolInstaller@1
+
+          - task: NuGetCommand@2
+            inputs:
+              restoreSolution: "$(solution)"
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: "build"
+              projects: "$(solution)"
+              arguments: "--configuration $(buildConfiguration)"
+  - stage: DockerBuildAndPush
+    displayName: "Build and push Docker Image"
+    jobs:
+      - job: BuildJob
+        displayName: "Build and Tag"
+        pool:
+          vmImage: "ubuntu-latest"
+        steps:
+          - task: Docker@2
+            displayName: "Build and Tag Docker Image"
+            inputs:
+              containerRegistry: "$(dockerRegistryServiceConnection)"
+              repository: "$(dockerRepository)"
+              command: "buildAndPush"
+              Dockerfile: "$(dockerFile)"
+              tags: |
+                latest
+                $(Build.BuildId)

@@ -1,0 +1,70 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  labels:
+    app.kubernetes.io/part-of: rekeningrijden
+  name: router-service-netherlands
+  namespace: default
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://groep2rekeningrijden.github.io/charts/
+    chart: router-service
+    targetRevision: '*'
+    helm:
+      parameters:
+        - name: serviceName
+          value: "router-service-netherlands"
+        - name: region.type
+          value: PLACE
+        - name: region.area
+          value: Brussels, Belgium
+        - name: region.south
+          value: "50.760785"
+        - name: region.west
+          value: "4.174805"
+        - name: region.north
+          value: "51.532669"
+        - name: region.east
+          value: "5.894165"
+        - name: serviceUri.car
+          value: "http://car-service/vehicle"
+        - name: serviceUri.payment
+          value: "http://payment-service/getPrices"
+        - name: masstransit.input
+          value: "IO.Swagger.DTOS:NLRawDTO"
+        - name: masstransit.output
+          value: "IO.Swagger.DTOS:NLRouteDTO"
+        - name: rabbitmq.host
+          value: "rabbitmq"
+        - name: rabbitmq.port
+          value: "5672"
+        - name: rabbitmq.user
+          value: "rabbit"
+        - name: rabbitmq.password
+          value: "rabbit"
+        - name: rabbitmq.queue
+          value: "py-router-netherlands"
+        - name: rabbitmq.virtualHost
+          value: "/"
+        - name: logLevel
+          value: info
+        - name: resources.memory
+          value: 1Gi
+        - name: resources.cpu
+          value: 500m
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  revisionHistoryLimit: 3
+  syncPolicy:
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
+      - FailOnSharedResource=true
+      - PruneLast=true
+    automated:
+      prune: true
+      selfHeal: true

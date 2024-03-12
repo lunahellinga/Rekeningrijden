@@ -1,0 +1,7 @@
+steps:
+  - task: CmdLine@2
+    displayName: Run pytest
+    inputs:
+      script: |
+        pipenv shell
+        pipenv run pytest -v  --cov --cov-report=xml --cov-report=html
